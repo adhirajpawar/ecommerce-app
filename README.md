@@ -1,35 +1,32 @@
-## Run Locally
+# 🛒 E-Commerce Platform
 
-Clone the project
+A full-stack e-commerce application built with React (frontend) and Node.js/Express (backend) with MongoDB database.
 
-```bash
-  git clone https://dredsoft-labs-admin@bitbucket.org/dredsoft-labs/ecommerce.git
-```
+## 🚀 Quick Start
 
-Go to the project directory
+### Prerequisites
 
-```bash
-  cd ecommerce
-```
+- Node.js
+- npm
+- MongoDB
 
-Install dependencies
+### Installation
 
-```bash
-  npm install
+1. **Clone the repository**
 
-  or 
+   ```bash
+   git clone <repository-url>
+   cd ecommerce
+   ```
 
-  npm install react-material-ui-carousel --save --legacy-peer-deps
-```
+2. **Start the application**
 
-Start the server
+   ```bash
+   npm start
+   ```
 
-```bash
-  npm start
-```
+3. **Access the application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:4000
 
-The server should now be running. You can access the application by opening a web browser and entering the following URL:
-
-```bash
-  http://localhost:3000
-```
+**Happy coding! 🚀**
