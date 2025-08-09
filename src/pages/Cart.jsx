@@ -3,6 +3,7 @@ import { Footer, Navbar } from "../components";
 import { useSelector, useDispatch } from "react-redux";
 import { addCart, delCart } from "../redux/action";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Cart = () => {
   const state = useSelector((state) => state.handleCart);
@@ -24,8 +25,17 @@ const Cart = () => {
   };
 
   const addItem = (product) => {
-    dispatch(addCart(product));
+    // Check if adding one more item would exceed stock
+    const currentQty = product.qty || 0;
+    const stock = product.stock || 10; // Default stock if not available
+    
+    if (currentQty < stock) {
+      dispatch(addCart(product));
+    } else {
+      toast.error(`Cannot add more items. Only ${stock} available in stock.`);
+    }
   };
+  
   const removeItem = (product) => {
     dispatch(delCart(product));
   };
@@ -53,6 +63,9 @@ const Cart = () => {
                   </div>
                   <div className="card-body">
                     {state.map((item) => {
+                      const stock = item.stock || 10; // Default stock if not available
+                      const canAddMore = (item.qty || 0) < stock;
+                      
                       return (
                         <div key={item.id}>
                           <div className="row d-flex align-items-center">
@@ -75,8 +88,13 @@ const Cart = () => {
                               <p>
                                 <strong>{item.title}</strong>
                               </p>
-                              {/* <p>Color: blue</p>
-                              <p>Size: M</p> */}
+                              {/* Stock status */}
+                              <small className={canAddMore ? 'text-success' : 'text-danger'}>
+                                {canAddMore ? 
+                                  `${stock - (item.qty || 0)} left in stock` : 
+                                  'Stock limit reached'
+                                }
+                              </small>
                             </div>
 
                             <div className="col-lg-4 col-md-6">
@@ -96,10 +114,16 @@ const Cart = () => {
                                 <p className="mx-5">{item.qty}</p>
 
                                 <button
-                                  className="btn px-3"
+                                  className={`btn px-3 ${!canAddMore ? 'btn-secondary' : ''}`}
                                   onClick={() => {
                                     addItem(item);
                                   }}
+                                  disabled={!canAddMore}
+                                  style={{ 
+                                    opacity: canAddMore ? 1 : 0.6,
+                                    cursor: canAddMore ? 'pointer' : 'not-allowed'
+                                  }}
+                                  title={!canAddMore ? 'Stock limit reached' : 'Add one more'}
                                 >
                                   <i className="fas fa-plus"></i>
                                 </button>

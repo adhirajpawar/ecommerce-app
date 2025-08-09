@@ -17,7 +17,13 @@ const Products = () => {
   const dispatch = useDispatch();
 
   const addProduct = (product) => {
-    dispatch(addCart(product));
+    // Check if product is in stock before adding to cart
+    if (product.stock > 0) {
+      dispatch(addCart(product));
+      toast.success("Added to cart");
+    } else {
+      toast.error("Product is out of stock");
+    }
   };
 
   useEffect(() => {
@@ -25,8 +31,18 @@ const Products = () => {
       setLoading(true);
       const response = await fetch("https://fakestoreapi.com/products/");
       if (componentMounted) {
-        setData(await response.clone().json());
-        setFilter(await response.json());
+        const productsData = await response.clone().json();
+        
+        // Add stock information to products (simulating real stock data)
+        const productsWithStock = productsData.map(product => ({
+          ...product,
+          stock: Math.floor(Math.random() * 10) + 1, // Random stock between 1-10 for demo
+          // For demo purposes, make some products out of stock
+          ...(Math.random() > 0.8 && { stock: 0 }) // 20% chance of being out of stock
+        }));
+        
+        setData(productsWithStock);
+        setFilter(productsWithStock);
         setLoading(false);
       }
 
@@ -108,6 +124,7 @@ const Products = () => {
         </div>
 
         {filter.map((product) => {
+          const isInStock = product.stock > 0;
           return (
             <div
               id={product.id}
@@ -115,6 +132,12 @@ const Products = () => {
               className="col-md-4 col-sm-6 col-xs-8 col-12 mb-4"
             >
               <div className="card text-center h-100" key={product.id}>
+                {/* Out of Stock Badge */}
+                {!isInStock && (
+                  <div className="position-absolute top-0 end-0 m-2">
+                    <span className="badge bg-secondary">Out of Stock</span>
+                  </div>
+                )}
                 <img
                   className="card-img-top p-3"
                   src={product.image}
@@ -131,24 +154,35 @@ const Products = () => {
                 </div>
                 <ul className="list-group list-group-flush">
                   <li className="list-group-item lead">$ {product.price}</li>
-                  {/* <li className="list-group-item">Dapibus ac facilisis in</li>
-                    <li className="list-group-item">Vestibulum at eros</li> */}
+                  {/* Stock Status */}
+                  <li className="list-group-item">
+                    {isInStock ? (
+                      <small className="text-success">
+                        {product.stock === 1 ? 'Only 1 left!' : `${product.stock} in stock`}
+                      </small>
+                    ) : (
+                      <small className="text-danger">Out of stock</small>
+                    )}
+                  </li>
                 </ul>
                 <div className="card-body">
                   <Link
                     to={"/product/" + product.id}
-                    className="btn btn-dark m-1"
+                    className={`btn ${isInStock ? 'btn-dark' : 'btn-secondary'} m-1`}
+                    style={{ pointerEvents: isInStock ? 'auto' : 'none' }}
                   >
-                    Buy Now
+                    {isInStock ? 'Buy Now' : 'Out of Stock'}
                   </Link>
                   <button
-                    className="btn btn-dark m-1"
-                    onClick={() => {
-                      toast.success("Added to cart");
-                      addProduct(product);
+                    className={`btn ${isInStock ? 'btn-dark' : 'btn-secondary'} m-1`}
+                    onClick={() => addProduct(product)}
+                    disabled={!isInStock}
+                    style={{ 
+                      opacity: isInStock ? 1 : 0.6,
+                      cursor: isInStock ? 'pointer' : 'not-allowed'
                     }}
                   >
-                    Add to Cart
+                    {isInStock ? 'Add to Cart' : 'Out of Stock'}
                   </button>
                 </div>
               </div>
